@@ -16,6 +16,7 @@ datasource db {
 model User {
   id            String        @id @default(uuid())
   username      String        @unique
+  githubId      String
   Participant   Participant[]
   hostedParties Party[]       @relation("UserAsHost")
 }
