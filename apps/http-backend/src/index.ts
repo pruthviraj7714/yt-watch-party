@@ -1,26 +1,21 @@
 import express from "express";
 import cors from "cors";
-import { prismaClient as prisma } from "@repo/db/client";
+import { partyRouter } from "./routes/party.route";
+import { userRouter } from "./routes/user.route";
+import { videoRouter } from "./routes/video.route";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.get("/", async (req, res) => {
-  await prisma.user.create({
-    data: {
-      githubId: Math.random().toString(),
-      username: Math.random().toString(),
-    },
-  });
-
-  const users = await prisma.user.findMany({});
-
-  res.status(200).json({
-    users,
-  });
+  res.status(200).send("Healthy server");
   return;
 });
+
+app.use('/api/v1/user', userRouter);
+app.use('/api/v1/party', partyRouter);
+app.use('/api/v1/video', videoRouter);
 
 app.listen(3001, () => {
   console.log("Server is Listening on PORT 3001");
