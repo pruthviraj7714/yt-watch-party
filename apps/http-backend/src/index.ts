@@ -3,6 +3,8 @@ import cors from "cors";
 import { partyRouter } from "./routes/party.route";
 import { userRouter } from "./routes/user.route";
 import { videoRouter } from "./routes/video.route";
+import { config } from "dotenv";
+config();
 
 const app = express();
 app.use(cors());

@@ -3,7 +3,9 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export const userMiddleware = (req : Request, res : Response, next : NextFunction) : any => {
     try {
-        const token = req.headers.authorization;
+        const headers = req.headers.authorization;
+
+        const token = headers?.split(" ")[1];
 
         if(!token) {
             return res.status(401).json(
@@ -13,12 +15,12 @@ export const userMiddleware = (req : Request, res : Response, next : NextFunctio
 
         const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!) as JwtPayload;
         
-        if(!decoded || !decoded.userId) {
+        if(!decoded || !decoded.id) {
             return res.status(400).json({
                 message : "Unauthorized"
             })
         }
-        req.userId = decoded.userId;
+        req.userId = decoded.id;
         next();
 
     } catch (error : any) {
