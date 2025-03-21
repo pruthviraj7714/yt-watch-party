@@ -22,7 +22,6 @@ export default function Landing() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center justify-between p-4">
           <div className="flex items-center gap-2">
@@ -96,7 +95,6 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="py-12 md:py-24 lg:py-32 xl:py-48">
         <div className="px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
@@ -144,7 +142,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-12 md:py-24 lg:py-32 bg-muted">
         <div className="px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -192,7 +189,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section id="how-it-works" className="py-12 md:py-24 lg:py-32">
         <div className="px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -234,7 +230,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-12 md:py-24 lg:py-32 bg-muted">
         <div className="px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -263,7 +258,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section id="faq" className="py-12 md:py-24 lg:py-32">
         <div className="px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -304,7 +298,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t p-6 md:py-0">
         <div className="flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <div className="flex items-center gap-2">

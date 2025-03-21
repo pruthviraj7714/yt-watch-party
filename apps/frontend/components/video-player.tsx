@@ -7,7 +7,6 @@ interface VideoPlayerProps {
   videoId: string
 }
 
-// Declare YT as a global variable to satisfy TypeScript
 declare global {
   interface Window {
     YT: any
@@ -19,17 +18,14 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
   const playerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Load YouTube IFrame API
     const tag = document.createElement("script")
     tag.src = "https://www.youtube.com/iframe_api"
     const firstScriptTag = document.getElementsByTagName("script")[0]
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
 
-    // Initialize player when API is ready
     const onYouTubeIframeAPIReady = () => {
       if (!playerRef.current) return
 
-      // @ts-ignore - YouTube API is loaded dynamically
       new window.YT.Player(playerRef.current, {
         videoId: videoId,
         playerVars: {

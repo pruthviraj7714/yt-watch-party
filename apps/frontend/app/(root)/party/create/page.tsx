@@ -12,11 +12,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { z } from "zod"
-
+import axios from 'axios'
+import { BACKEND_URL } from "../../../../config/config"
+import { toast } from "sonner"
+import { useSession } from "next-auth/react"
 
 export default function CreatePartyPage() {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data : session} = useSession();
 
   const form = useForm<z.infer<typeof createPartySchema>>({
     resolver: zodResolver(createPartySchema),
@@ -26,18 +30,19 @@ export default function CreatePartyPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof createPartySchema>) {
+  async function onSubmit(values: z.infer<typeof createPartySchema>) {
     setIsSubmitting(true)
-
-    // In a real app, you would save this to a database
-    console.log(values)
-
-    // Simulate API call
-    setTimeout(() => {
+      const res = await axios.post(`${BACKEND_URL}/party/create`, {
+        slug : values.slug,
+        videoUrl : values.videoUrl
+      }, {
+        headers : {
+          Authorization : `Bearer ${session?.user.accessToken}`
+        }
+      });
+      toast.success(res.data.message);
       setIsSubmitting(false)
-      // Redirect to the newly created party
       router.push(`/party/${values.slug}`)
-    }, 1000)
   }
 
   return (
