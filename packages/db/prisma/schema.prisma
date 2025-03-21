@@ -40,7 +40,7 @@ model Party {
   host             User          @relation("UserAsHost", fields: [hostId], references: [id])
   createdAt        DateTime      @default(now())
   participants     Participant[]
-  currentTimestamp Float?        @default(0)
+  currentTimestamp Float        @default(0)
 
   @@index([slug])
 }
