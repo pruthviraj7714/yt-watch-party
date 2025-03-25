@@ -1,16 +1,18 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Send } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect, useState } from "react";
+import { Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSocket } from "../hooks/useSocket";
+import { useSession } from "next-auth/react";
 
 interface ChatPanelProps {
-  partyId: string
+  partyId: string;
 }
 
 const initialMessages = [
@@ -44,30 +46,51 @@ const initialMessages = [
     content: "Can someone explain what they just said at 2:45?",
     timestamp: new Date(Date.now() - 1000 * 60 * 1),
   },
-]
+];
 
 export function ChatPanel({ partyId }: ChatPanelProps) {
-  const [messages, setMessages] = useState(initialMessages)
-  const [newMessage, setNewMessage] = useState("")
+  const [messages, setMessages] = useState(initialMessages);
+  const [newMessage, setNewMessage] = useState("");
+  const { loading, wsError, socket } = useSocket();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.send(
+      JSON.stringify({
+        type: "JOIN_PARTY",
+        userId: session?.user.id,
+        partyId: partyId,
+      })
+    );
+
+    socket.onmessage = ({ data }: MessageEvent) => {
+      const payload = JSON.parse(data);
+
+      switch (payload.type) {
+        case "PARTY_JOINED":
+          console.log("JOINED Party");
+          break;
+      }
+    };
+  }, [loading]);
 
   const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!newMessage.trim()) return
+    if (!newMessage.trim()) return;
 
-    // Add new message
     const message = {
       id: Date.now().toString(),
       user: "You",
       content: newMessage,
       timestamp: new Date(),
-    }
+    };
 
-    setMessages([...messages, message])
-    setNewMessage("")
-
-    // In a real app, you would send this to a real-time service
-  }
+    setMessages([...messages, message]);
+    setNewMessage("");
+  };
 
   return (
     <Card className="flex flex-col h-[calc(100vh-250px)]">
@@ -78,7 +101,10 @@ export function ChatPanel({ partyId }: ChatPanelProps) {
               <div className="flex items-center gap-2">
                 <span className="font-medium text-sm">{message.user}</span>
                 <span className="text-xs text-muted-foreground">
-                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>
               </div>
               <p className="text-sm">{message.content}</p>
@@ -102,6 +128,5 @@ export function ChatPanel({ partyId }: ChatPanelProps) {
         </form>
       </div>
     </Card>
-  )
+  );
 }
-
