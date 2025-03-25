@@ -19,6 +19,7 @@ model User {
   githubId      String
   Participant   Participant[]
   hostedParties Party[]       @relation("UserAsHost")
+  chats         Chat[]
 }
 
 model Participant {
@@ -40,7 +41,18 @@ model Party {
   host             User          @relation("UserAsHost", fields: [hostId], references: [id])
   createdAt        DateTime      @default(now())
   participants     Participant[]
-  currentTimestamp Float        @default(0)
+  currentTimestamp Float         @default(0)
+  chats            Chat[]
 
   @@index([slug])
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  partyId   String
+  party     Party    @relation(fields: [partyId], references: [id])
+  msg       String
+  createdAt DateTime @default(now())
 }
