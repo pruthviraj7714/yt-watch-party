@@ -5,7 +5,13 @@ export interface IParty {
   isPlaying: boolean;
   hostId: string;
   createdAt: Date;
-  participants: any[];
+  participants: IParticipant[];
   currentTimestamp: number;
   chats: any[];
+}
+
+export interface IParticipant {
+  id : string;
+  participantId : string;
+  partyId : string;
 }
