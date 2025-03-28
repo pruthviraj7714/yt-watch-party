@@ -9,7 +9,7 @@ import { ChatPanel } from "./chat-panel";
 import { useSocket } from "../hooks/useSocket";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { IParticipant, IParty } from "../types/type";
+import { IChat, IParticipant, IParty } from "../types/type";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -24,6 +24,7 @@ export default function PartyPageComponent({
   const [participants, setParticipants] = useState<IParticipant[]>(
     party.participants
   );
+  const [chats, setChats] = useState<IChat[]>(party.chats);
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -43,6 +44,18 @@ export default function PartyPageComponent({
       })
     );
     socket.close();
+  };
+
+  const handleSendMessage = (newMessage: string) => {
+    if (!socket) return;
+    socket.send(
+      JSON.stringify({
+        type: "SEND_MESSAGE",
+        userId: session?.user.id,
+        message: newMessage,
+        partyId: party.id,
+      })
+    );
   };
 
   useEffect(() => {
@@ -77,6 +90,9 @@ export default function PartyPageComponent({
           break;
         case "PARTY_CLOSED":
           console.log("party closed");
+          break;
+        case "MESSAGE_RECIEVED":
+          setChats((prev) => [...prev, payload.msg]);
           break;
         case "ERROR":
           toast.error(payload.error);
@@ -128,19 +144,19 @@ export default function PartyPageComponent({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="chat" className="mt-4">
-              <ChatPanel partyId={party.id} />
+              <ChatPanel messages={chats} onMessageSend={handleSendMessage} />
             </TabsContent>
             <TabsContent value="participants" className="mt-4">
               <Card className="p-4">
                 <div className="space-y-4">
-                  {Array.from({ length: participants.length }).map((_, i) => (
+                  {participants.map((p, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-medium">U{i + 1}</span>
+                        <span className="text-xs font-medium">{p.participant.username[0]!.toUpperCase()}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium">User {i + 1}</p>
-                        {i === 0 && (
+                        <p className="text-sm font-medium">{p.participant.username}</p>
+                        {p.participantId === party.hostId && (
                           <p className="text-xs text-muted-foreground">Host</p>
                         )}
                       </div>

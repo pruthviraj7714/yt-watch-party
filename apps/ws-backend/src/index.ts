@@ -41,6 +41,7 @@ wss.on("connection", function connection(ws, req) {
 
       case "SEND_MESSAGE":
         console.log("Message sent");
+        partyManager.sendMessage(payload.partyId, userId, ws, payload.message);
         break;
 
       case "CHANGE_TIMESTAMP":

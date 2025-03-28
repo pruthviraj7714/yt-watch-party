@@ -11,7 +11,21 @@ export interface IParty {
 }
 
 export interface IParticipant {
-  id : string;
-  participantId : string;
-  partyId : string;
+  id: string;
+  participantId: string;
+  participant : {
+    username : string;
+  }
+  partyId: string;
+}
+
+export interface IChat {
+  id: string;
+  userId: string;
+  user : {
+    username : string;
+  }
+  partyId: string;
+  msg: string;
+  createdAt: Date;
 }

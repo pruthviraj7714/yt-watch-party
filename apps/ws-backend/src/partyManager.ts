@@ -6,6 +6,15 @@ interface IParticipant {
   ws: WebSocket;
 }
 
+interface IChat {
+  id: string;
+  userId: string;
+  partyId: string;
+  msg: string;
+  createdAt: Date;
+}
+
+
 interface IParty {
   id: string;
   participants: IParticipant[];
@@ -65,6 +74,13 @@ class PartyManager {
           participantId: userId,
           partyId,
         },
+        include : {
+          participant : {
+            select : {
+              username : true
+            }
+          }
+        }
       });
       this.broadcastToParty(
         partyId,
@@ -134,6 +150,58 @@ class PartyManager {
       );
     }
   }
+
+  public async sendMessage(partyId : string, userId : string, ws : WebSocket, message : string) {
+    try {
+      const party = this.partyMap.get(partyId);
+
+      if (!party) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Party does not exist",
+          })
+        );
+        return;
+      }
+
+      const msg = await prismaClient.chat.create({
+        data : {
+          partyId ,
+          userId,
+          msg : message,
+        },
+        include : {
+          user : {
+            select : {
+              username : true
+            }
+          }
+        }
+      })
+
+      this.partyMap.get(partyId)!.chats = [...party.chats, msg];
+
+      this.broadcastToParty(
+        partyId,
+        JSON.stringify({
+          type: "MESSAGE_RECIEVED",
+          partyId,
+          userId,
+          msg
+        })
+      );
+    } catch (error: any) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          error: error.message,
+        })
+      );
+    }
+    
+  }
+
 }
 
 export default PartyManager.getInstance();

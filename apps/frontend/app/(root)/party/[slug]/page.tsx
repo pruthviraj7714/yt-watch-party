@@ -10,8 +10,24 @@ const fetchPartyData = async (partySlug: string) => {
         slug: partySlug,
       },
       include: {
-        participants: true,
-        chats : true,
+        participants: {
+          include : {
+            participant : {
+              select : {
+                username : true
+              }
+            }
+          }
+        },
+        chats : {
+          include : {
+            user : {
+              select : {
+                username : true
+              }
+            }
+          }
+        },
       },
     });
     return party;
