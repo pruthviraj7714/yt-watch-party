@@ -33,14 +33,13 @@ wss.on("connection", function connection(ws, req) {
     
     switch (payload.type) {
       case "JOIN_PARTY":
-        partyManager.joinParty(payload.partyId, userId, ws);
+        partyManager.joinParty(payload.partyId, userId, ws, payload.username, payload.hostId);
         break;
       case "LEAVE_PARTY":
         partyManager.leaveParty(payload.partyId, userId, ws);
         break;
 
       case "SEND_MESSAGE":
-        console.log("Message sent");
         partyManager.sendMessage(payload.partyId, userId, ws, payload.message);
         break;
 
@@ -49,7 +48,7 @@ wss.on("connection", function connection(ws, req) {
         break;
 
       case "CLOSE_PARTY":
-        console.log("PArty closed");
+        partyManager.closeParty(payload.partyId, userId, ws);
         break;
     }
   });

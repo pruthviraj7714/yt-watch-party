@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { IChat, IParticipant, IParty } from "../types/type";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function PartyPageComponent({
   party,
@@ -58,12 +59,25 @@ export default function PartyPageComponent({
     );
   };
 
+  const handleCloseParty = () => {
+    if (!socket) return;
+    socket.send(
+      JSON.stringify({
+        type: "CLOSE_PARTY",
+        userId: session?.user.id,
+        partyId: party.id,
+      })
+    );
+  };
+
   useEffect(() => {
     if (!socket) return;
     socket.send(
       JSON.stringify({
         type: "JOIN_PARTY",
         partyId: party.id,
+        hostId: party.hostId,
+        username: session?.user.name,
       })
     );
 
@@ -75,21 +89,33 @@ export default function PartyPageComponent({
         case "PARTY_JOINED":
           if (party.id === payload.partyId) {
             setParticipants((prev) => [...prev, payload.participant]);
+            if (payload.userId !== session?.user.id) {
+              toast(`${payload.username} joined party!`);
+            }
           }
           break;
         case "PARTY_LEFT":
-          toast("Left Party");
           if (party.id === payload.partyId) {
             setParticipants((prev) =>
               prev.filter((p) => p.participantId !== payload.userId)
             );
+            if (payload.userId !== session?.user.id) {
+              toast(`${payload.username} left party!`);
+            }
           }
           break;
         case "TIMESTAMP_CHANGED":
           console.log("Timestamp changed");
           break;
         case "PARTY_CLOSED":
-          console.log("party closed");
+          if (payload.partyId === party.id) {
+            if (session?.user?.id && session.user.id === party.hostId) {
+              toast.success("You have successfully closed the party.");
+            } else {
+              toast.success("The host has closed the party.");
+            }
+            router.push("/home");
+          }
           break;
         case "MESSAGE_RECIEVED":
           setChats((prev) => [...prev, payload.msg]);
@@ -129,6 +155,14 @@ export default function PartyPageComponent({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <VideoPlayer videoId={videoId} />
+
+          <div className="mt-4">
+            {session?.user.id === party.hostId && (
+              <Button variant={"destructive"} onClick={handleCloseParty}>
+                Close Party
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="lg:col-span-1">
@@ -152,10 +186,14 @@ export default function PartyPageComponent({
                   {participants.map((p, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-medium">{p.participant.username[0]!.toUpperCase()}</span>
+                        <span className="text-xs font-medium">
+                          {p.participant.username[0]!.toUpperCase()}
+                        </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{p.participant.username}</p>
+                        <p className="text-sm font-medium">
+                          {p.participant.username}
+                        </p>
                         {p.participantId === party.hostId && (
                           <p className="text-xs text-muted-foreground">Host</p>
                         )}

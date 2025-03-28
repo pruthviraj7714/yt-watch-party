@@ -4,6 +4,7 @@ import { WebSocket } from "ws";
 interface IParticipant {
   userId: string;
   ws: WebSocket;
+  username : string;
 }
 
 interface IChat {
@@ -14,11 +15,11 @@ interface IChat {
   createdAt: Date;
 }
 
-
 interface IParty {
   id: string;
+  hostId: string;
   participants: IParticipant[];
-  chats: any[];
+  chats: IChat[];
 }
 
 class PartyManager {
@@ -50,22 +51,28 @@ class PartyManager {
     }
   }
 
-  public async joinParty(partyId: string, userId: string, ws: WebSocket) {
+  public async joinParty(
+    partyId: string,
+    userId: string,
+    ws: WebSocket,
+    username : string,
+    hostId: string
+  ) {
     const party = this.partyMap.get(partyId);
 
-  if (!party) {
+    if (!party) {
       let party = {
         id: partyId,
         chats: [],
-        participants: [{ userId, ws }],
+        participants: [{ userId, ws, username }],
+        hostId,
       };
       this.partyMap.set(partyId, party);
-    } else if(party.participants.some(p => p.ws === ws)) {
+    } else if (party.participants.some((p) => p.ws === ws)) {
       console.log("User alreday exists");
       return;
-    } 
-    else {
-      party?.participants.push({ userId, ws });
+    } else {
+      party?.participants.push({ userId, ws, username });
     }
 
     try {
@@ -74,13 +81,13 @@ class PartyManager {
           participantId: userId,
           partyId,
         },
-        include : {
-          participant : {
-            select : {
-              username : true
-            }
-          }
-        }
+        include: {
+          participant: {
+            select: {
+              username: true,
+            },
+          },
+        },
       });
       this.broadcastToParty(
         partyId,
@@ -88,6 +95,7 @@ class PartyManager {
           type: "PARTY_JOINED",
           partyId,
           userId,
+          username,
           participant,
         })
       );
@@ -113,11 +121,11 @@ class PartyManager {
           })
         );
         return;
-      }
+      };
 
-      const updatedParticipants = party.participants.filter(
-        (p) => p.ws !== ws
-      );
+      const username = party.participants.find(p => p.userId === userId)?.username ?? '';
+
+      const updatedParticipants = party.participants.filter((p) => p.ws !== ws);
       this.partyMap.get(partyId)!.participants = updatedParticipants;
 
       if (updatedParticipants.length === 0) {
@@ -139,6 +147,7 @@ class PartyManager {
           type: "PARTY_LEFT",
           partyId,
           userId,
+          username
         })
       );
     } catch (error: any) {
@@ -151,7 +160,12 @@ class PartyManager {
     }
   }
 
-  public async sendMessage(partyId : string, userId : string, ws : WebSocket, message : string) {
+  public async sendMessage(
+    partyId: string,
+    userId: string,
+    ws: WebSocket,
+    message: string
+  ) {
     try {
       const party = this.partyMap.get(partyId);
 
@@ -166,19 +180,19 @@ class PartyManager {
       }
 
       const msg = await prismaClient.chat.create({
-        data : {
-          partyId ,
+        data: {
+          partyId,
           userId,
-          msg : message,
+          msg: message,
         },
-        include : {
-          user : {
-            select : {
-              username : true
-            }
-          }
-        }
-      })
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
+      });
 
       this.partyMap.get(partyId)!.chats = [...party.chats, msg];
 
@@ -188,7 +202,7 @@ class PartyManager {
           type: "MESSAGE_RECIEVED",
           partyId,
           userId,
-          msg
+          msg,
         })
       );
     } catch (error: any) {
@@ -199,9 +213,70 @@ class PartyManager {
         })
       );
     }
-    
   }
 
+  public async closeParty(partyId: string, userId: string, ws: WebSocket) {
+    try {
+      const party = this.partyMap.get(partyId);
+
+      if (!party) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Party does not exist",
+          })
+        );
+        return;
+      }
+
+      if (party.hostId !== userId) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Unauthorized: Only the host can close the party",
+          })
+        );
+        return;
+      }
+
+      this.broadcastToParty(
+        partyId,
+        JSON.stringify({
+          type: "PARTY_CLOSED",
+          partyId,
+        })
+      );
+
+      await prismaClient.$transaction(async (tx) => {
+        await tx.chat.deleteMany({
+          where: {
+            partyId,
+          },
+        });
+
+        await tx.participant.deleteMany({
+          where: {
+            partyId,
+          },
+        });
+
+        await tx.party.delete({
+          where : {
+            id : partyId
+          }
+        })
+      });
+
+      this.partyMap.delete(partyId);
+    } catch (error: any) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          error: error.message,
+        })
+      );
+    }
+  }
 }
 
 export default PartyManager.getInstance();
