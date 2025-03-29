@@ -121,3 +121,59 @@ export const deleteParty = async (
     });
   }
 };
+
+export const changeTimestamp = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const partyId = req.params.partyId;
+    const hostId = req.userId!;
+    const newTimestamp = req.body.newTimestamp;
+
+    if (!partyId) {
+      res.status(400).json({
+        message: "Party Id not found!",
+      });
+      return;
+    }
+
+    const party = await prisma.party.findFirst({
+      where: {
+        id: partyId,
+      },
+    });
+
+    if (!party) {
+      res.status(400).json({
+        message: "Party Not found!",
+      });
+      return;
+    }
+
+    if (party.hostId !== hostId) {
+      res.status(403).json({
+        message: "You are not authorized to change timestamp",
+      });
+      return;
+    }
+
+    await prisma.party.update({
+      where: {
+        id: partyId,
+      },
+      data : {
+        currentTimestamp : Number(newTimestamp)
+      }
+    });
+
+    res.status(200).json({
+      message: "Timestamp successfully updated!",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowLeft, MessageSquare, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,6 +25,10 @@ export default function PartyPageComponent({
     party.participants
   );
   const [chats, setChats] = useState<IChat[]>(party.chats);
+  const [currentTimestamp, setCurrentTimestamp] = useState(
+    party.currentTimestamp
+  );
+  const [videoPlayStatus, setVideoPlayStatus] = useState(party.isPlaying);
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -70,6 +73,40 @@ export default function PartyPageComponent({
     );
   };
 
+  const handlePauseParty = () => {
+    if (!socket) return;
+    socket.send(
+      JSON.stringify({
+        type: "PAUSE_PARTY",
+        userId: session?.user.id,
+        partyId: party.id,
+      })
+    );
+  };
+
+  const handlePlayParty = () => {
+    if (!socket) return;
+    socket.send(
+      JSON.stringify({
+        type: "PLAY_PARTY",
+        userId: session?.user.id,
+        partyId: party.id,
+      })
+    );
+  };
+
+  const handleChangeTimestamp = (newTimestamp: number) => {
+    if (!socket) return;
+    socket.send(
+      JSON.stringify({
+        type: "CHANGE_TIMESTAMP",
+        userId: session?.user.id,
+        partyId: party.id,
+        newTimestamp: newTimestamp,
+      })
+    );
+  };
+
   useEffect(() => {
     if (!socket) return;
     socket.send(
@@ -105,8 +142,23 @@ export default function PartyPageComponent({
           }
           break;
         case "TIMESTAMP_CHANGED":
-          console.log("Timestamp changed");
+          setCurrentTimestamp(payload.newTimestamp);
           break;
+
+        case "PARTY_PAUSED":
+          setVideoPlayStatus(false);
+          if (session?.user.id !== party.hostId) {
+            toast("Host paused the party");
+          }
+          break;
+
+        case "PARTY_PLAYED":
+          setVideoPlayStatus(true);
+          if (session?.user.id !== party.hostId) {
+            toast.success("Host played the party");
+          }
+          break;
+
         case "PARTY_CLOSED":
           if (payload.partyId === party.id) {
             if (session?.user?.id && session.user.id === party.hostId) {
@@ -154,7 +206,16 @@ export default function PartyPageComponent({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <VideoPlayer videoId={videoId} />
+          <VideoPlayer
+            videoId={videoId}
+            hostId={party.hostId}
+            partyId={party.id}
+            currentTimestamp={currentTimestamp}
+            onPause={handlePauseParty}
+            onPlay={handlePlayParty}
+            onTimeChange={handleChangeTimestamp}
+            isPlaying={videoPlayStatus}
+          />
 
           <div className="mt-4">
             {session?.user.id === party.hostId && (

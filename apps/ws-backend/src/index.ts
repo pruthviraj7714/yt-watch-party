@@ -30,10 +30,16 @@ wss.on("connection", function connection(ws, req) {
   ws.on("message", function message(data: string) {
     const payload = JSON.parse(data);
     console.log(payload);
-    
+
     switch (payload.type) {
       case "JOIN_PARTY":
-        partyManager.joinParty(payload.partyId, userId, ws, payload.username, payload.hostId);
+        partyManager.joinParty(
+          payload.partyId,
+          userId,
+          ws,
+          payload.username,
+          payload.hostId
+        );
         break;
       case "LEAVE_PARTY":
         partyManager.leaveParty(payload.partyId, userId, ws);
@@ -43,8 +49,21 @@ wss.on("connection", function connection(ws, req) {
         partyManager.sendMessage(payload.partyId, userId, ws, payload.message);
         break;
 
+      case "PAUSE_PARTY":
+        partyManager.pauseParty(payload.partyId, userId, ws);
+        break;
+
+      case "PLAY_PARTY":
+        partyManager.playParty(payload.partyId, userId, ws);
+        break;
+
       case "CHANGE_TIMESTAMP":
-        console.log("Timestamp changed");
+        partyManager.changeTimestamp(
+          payload.partyId,
+          userId,
+          ws,
+          payload.newTimestamp
+        );
         break;
 
       case "CLOSE_PARTY":

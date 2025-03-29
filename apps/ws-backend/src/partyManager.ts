@@ -277,6 +277,160 @@ class PartyManager {
       );
     }
   }
+
+  public async pauseParty(partyId: string, userId: string, ws: WebSocket) {
+    try {
+      const party = this.partyMap.get(partyId);
+
+      if (!party) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Party does not exist",
+          })
+        );
+        return;
+      }
+
+      if (party.hostId !== userId) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Unauthorized: Only the host can pause the party",
+          })
+        );
+        return;
+      }
+
+      await prismaClient.party.update({
+        where : {
+          id : partyId
+        },
+        data : {
+          isPlaying : false
+        }
+      })
+
+      this.broadcastToParty(
+        partyId,
+        JSON.stringify({
+          type: "PARTY_PAUSED",
+          partyId,
+        })
+      );
+
+    } catch (error: any) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          error: error.message,
+        })
+      );
+    }
+  }
+
+  public async playParty(partyId: string, userId: string, ws: WebSocket) {
+    try {
+      const party = this.partyMap.get(partyId);
+
+      if (!party) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Party does not exist",
+          })
+        );
+        return;
+      }
+
+      if (party.hostId !== userId) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Unauthorized: Only the host can play the party",
+          })
+        );
+        return;
+      }
+
+      await prismaClient.party.update({
+        where : {
+          id : partyId
+        },
+        data : {
+          isPlaying : true
+        }
+      })
+
+      this.broadcastToParty(
+        partyId,
+        JSON.stringify({
+          type: "PARTY_PLAYED",
+          partyId,
+        })
+      );
+
+    } catch (error: any) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          error: error.message,
+        })
+      );
+    }
+  }
+
+  public async changeTimestamp(partyId: string, userId: string, ws: WebSocket, newTimestamp : number) {
+    try {
+      const party = this.partyMap.get(partyId);
+
+      if (!party) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Party does not exist",
+          })
+        );
+        return;
+      }
+
+      if (party.hostId !== userId) {
+        ws.send(
+          JSON.stringify({
+            type: "ERROR",
+            error: "Unauthorized: Only the host can control party",
+          })
+        );
+        return;
+      }
+
+      await prismaClient.party.update({
+        where : {
+          id : partyId
+        },
+        data : {
+          currentTimestamp : newTimestamp
+        }
+      })
+
+      this.broadcastToParty(
+        partyId,
+        JSON.stringify({
+          type: "TIMESTAMP_CHANGED",
+          partyId,
+          newTimestamp
+        })
+      );
+
+    } catch (error: any) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          error: error.message,
+        })
+      );
+    }
+  }
 }
 
 export default PartyManager.getInstance();
