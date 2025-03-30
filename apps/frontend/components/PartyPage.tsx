@@ -12,7 +12,17 @@ import { IChat, IParticipant, IParty } from "../types/type";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 export default function PartyPageComponent({
   party,
   videoId,
@@ -141,6 +151,7 @@ export default function PartyPageComponent({
             }
           }
           break;
+
         case "TIMESTAMP_CHANGED":
           setCurrentTimestamp(payload.newTimestamp);
           break;
@@ -148,14 +159,14 @@ export default function PartyPageComponent({
         case "PARTY_PAUSED":
           setVideoPlayStatus(false);
           if (session?.user.id !== party.hostId) {
-            toast("Host paused the party");
+            toast.info("The host has paused the party.");
           }
           break;
 
         case "PARTY_PLAYED":
           setVideoPlayStatus(true);
           if (session?.user.id !== party.hostId) {
-            toast.success("Host played the party");
+            toast.success("The host has resumed the party.");
           }
           break;
 
@@ -164,7 +175,7 @@ export default function PartyPageComponent({
             if (session?.user?.id && session.user.id === party.hostId) {
               toast.success("You have successfully closed the party.");
             } else {
-              toast.success("The host has closed the party.");
+              toast.warning("The party has been closed by the host.");
             }
             router.push("/home");
           }
@@ -219,9 +230,34 @@ export default function PartyPageComponent({
 
           <div className="mt-4">
             {session?.user.id === party.hostId && (
-              <Button variant={"destructive"} onClick={handleCloseParty}>
-                Close Party
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <div className="rounded-xl bg-red-500 hover:bg-red-600 text-white px-4 py-1">
+                    Close Party
+                  </div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      the party and remove all its associated data from our
+                      servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      onClick={handleCloseParty}
+                    >
+                      Close Party
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
@@ -239,17 +275,31 @@ export default function PartyPageComponent({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="chat" className="mt-4">
-              <ChatPanel messages={chats} onMessageSend={handleSendMessage} />
+              <ChatPanel
+                hostId={party.hostId}
+                messages={chats}
+                onMessageSend={handleSendMessage}
+              />
             </TabsContent>
             <TabsContent value="participants" className="mt-4">
               <Card className="p-4">
                 <div className="space-y-4">
                   {participants.map((p, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {p.participant.username[0]!.toUpperCase()}
-                        </span>
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden border border-border flex-shrink-0 bg-muted flex items-center justify-center">
+                        {p.participant.image ? (
+                          <img
+                            src={p.participant.image || "/placeholder.svg"}
+                            alt={`${p.participant.username}'s profile`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                            {p.participant.username
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-medium">

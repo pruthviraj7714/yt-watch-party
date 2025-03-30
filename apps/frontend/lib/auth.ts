@@ -44,6 +44,8 @@ export const authOptions: NextAuthOptions = {
               data: {
                 githubId: profile.id.toString(),
                 username: profile.login || profile.name!,
+                //@ts-ignore
+                image : profile.avatar_url!
               },
             });
           }

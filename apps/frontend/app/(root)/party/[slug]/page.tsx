@@ -14,7 +14,8 @@ const fetchPartyData = async (partySlug: string) => {
           include : {
             participant : {
               select : {
-                username : true
+                username : true,
+                image : true
               }
             }
           }
@@ -23,7 +24,8 @@ const fetchPartyData = async (partySlug: string) => {
           include : {
             user : {
               select : {
-                username : true
+                username : true,
+                image : true
               }
             }
           }

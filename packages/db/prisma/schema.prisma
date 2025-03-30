@@ -17,6 +17,7 @@ model User {
   id            String        @id @default(uuid())
   username      String        @unique
   githubId      String
+  image         String
   Participant   Participant[]
   hostedParties Party[]       @relation("UserAsHost")
   chats         Chat[]
@@ -30,7 +31,6 @@ model Participant {
   partyId       String
 
   @@unique([participantId, partyId])
-
 }
 
 model Party {

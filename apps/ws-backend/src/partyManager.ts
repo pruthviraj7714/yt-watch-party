@@ -85,6 +85,7 @@ class PartyManager {
           participant: {
             select: {
               username: true,
+              image : true
             },
           },
         },
@@ -189,6 +190,7 @@ class PartyManager {
           user: {
             select: {
               username: true,
+              image : true
             },
           },
         },

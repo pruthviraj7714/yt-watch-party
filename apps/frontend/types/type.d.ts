@@ -15,6 +15,7 @@ export interface IParticipant {
   participantId: string;
   participant : {
     username : string;
+    image : string;
   }
   partyId: string;
 }
@@ -24,6 +25,7 @@ export interface IChat {
   userId: string;
   user : {
     username : string;
+    image : string;
   }
   partyId: string;
   msg: string;

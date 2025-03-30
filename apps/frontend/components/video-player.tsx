@@ -102,7 +102,7 @@ export function VideoPlayer({
         const currentTime = Math.floor(playerRef.current.getCurrentTime());
         
         if (Math.abs(currentTime - lastSyncedTime.current) > 1) {
-          await axios.post(
+          const res = await axios.post(
             `${BACKEND_URL}/party/${partyId}/update-timestamp`,
             { newTimestamp: currentTime },
             {
