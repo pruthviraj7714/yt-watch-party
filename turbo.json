@@ -14,7 +14,8 @@
         "NEXT_PUBLIC_WS_URL",
         "DATABASE_URL",
         "DIRECT_URL",
-        "NEXTAUTH_URL"
+        "NEXTAUTH_URL",
+        "PRISMA_CLI_QUERY_ENGINE_TYPE"
       ]
     },
     "lint": {
