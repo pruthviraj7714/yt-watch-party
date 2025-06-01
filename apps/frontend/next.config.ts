@@ -7,14 +7,24 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images : {
-    remotePatterns : [
+  images: {
+    remotePatterns: [
       {
-        protocol : "https",
-        hostname : "**"
+        protocol: "https",
+        hostname: "**"
       }
     ]
-  }
+  },
+  experimental: {
+    serverComponentsExternalPackages: ['@repo/db/client', 'prisma'],
+  },
+  webpack: (config) => {
+    config.externals.push({
+      'utf-8-validate': 'commonjs utf-8-validate',
+      'bufferutil': 'commonjs bufferutil',
+    });
+    return config;
+  },
 };
 
 export default nextConfig;
