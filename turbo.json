@@ -16,8 +16,7 @@
         "DIRECT_URL",
         "NEXTAUTH_URL",
         "PRISMA_CLI_QUERY_ENGINE_TYPE",
-        "PRISMA_CLI_BINARY_TARGETS",
-        "PRISMA_QUERY_ENGINE_LIBRARY"
+        "PRISMA_CLI_BINARY_TARGETS"
       ]
     },
     "lint": {
