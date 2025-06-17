@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { PartyCard } from "../../../components/party-card";
-import { prismaClient as prisma } from "@repo/db/client";
+import { prisma } from "@repo/db/client";
 
 const fetchParties = async () => {
   try {

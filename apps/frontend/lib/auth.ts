@@ -1,7 +1,7 @@
 import { sign } from "jsonwebtoken";
 import { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
-import { prismaClient as prisma } from "@repo/db/client";
+import {  prisma } from "@repo/db/client";
 import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {

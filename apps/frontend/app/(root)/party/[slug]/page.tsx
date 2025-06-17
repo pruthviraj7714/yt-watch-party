@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { prismaClient } from "@repo/db/client";
+import { prisma } from "@repo/db/client";
 import PartyPageComponent from "../../../../components/PartyPage";
 
 const fetchPartyData = async (partySlug: string) => {
   try {
-    const party = await prismaClient.party.findFirst({
+    const party = await prisma.party.findFirst({
       where: {
         slug: partySlug,
       },

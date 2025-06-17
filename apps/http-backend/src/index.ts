@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import { partyRouter } from "./routes/party.route";
-import { userRouter } from "./routes/user.route";
-import { videoRouter } from "./routes/video.route";
 import { config } from "dotenv";
+import { userRouter } from "./routes/user.route";
+import { partyRouter } from "./routes/party.route";
+import { videoRouter } from "./routes/video.route";
 config();
 
 const app = express();

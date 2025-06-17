@@ -6,8 +6,12 @@
   "exports": {
     "./client": "./src/index.ts"
   },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  },
   "scripts": {
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
+    "build": "prisma generate --schema=./prisma/schema.prisma"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*"

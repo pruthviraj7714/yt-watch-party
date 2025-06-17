@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaClient as prisma } from "@repo/db/client";
+import {  prisma } from "@repo/db/client";
 import { createPartySchema } from "@repo/types/types";
 
 export const createParty = async (

@@ -1,4 +1,4 @@
-import { prismaClient } from "@repo/db/client";
+import { prisma } from "@repo/db/client";
 import { WebSocket } from "ws";
 
 interface IParticipant {
@@ -76,7 +76,7 @@ class PartyManager {
     }
 
     try {
-      const participant = await prismaClient.participant.create({
+      const participant = await prisma.participant.create({
         data: {
           participantId: userId,
           partyId,
@@ -133,7 +133,7 @@ class PartyManager {
         this.partyMap.delete(partyId);
       }
 
-      await prismaClient.participant.delete({
+      await prisma.participant.delete({
         where: {
           participantId_partyId: {
             participantId: userId,
@@ -180,7 +180,7 @@ class PartyManager {
         return;
       }
 
-      const msg = await prismaClient.chat.create({
+      const msg = await prisma.chat.create({
         data: {
           partyId,
           userId,
@@ -249,7 +249,7 @@ class PartyManager {
         })
       );
 
-      await prismaClient.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx) => {
         await tx.chat.deleteMany({
           where: {
             partyId,
@@ -304,7 +304,7 @@ class PartyManager {
         return;
       }
 
-      await prismaClient.party.update({
+      await prisma.party.update({
         where : {
           id : partyId
         },
@@ -355,7 +355,7 @@ class PartyManager {
         return;
       }
 
-      await prismaClient.party.update({
+      await prisma.party.update({
         where : {
           id : partyId
         },
@@ -406,7 +406,7 @@ class PartyManager {
         return;
       }
 
-      await prismaClient.party.update({
+      await prisma.party.update({
         where : {
           id : partyId
         },

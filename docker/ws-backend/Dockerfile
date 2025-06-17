@@ -12,6 +12,8 @@ COPY ./apps/ws-backend ./apps/ws-backend
 
 RUN corepack enable && pnpm install --frozen-lockfile
 
+RUN pnpm --filter=@repo/db exec prisma generate
+
 EXPOSE 8080
 
 WORKDIR /usr/src/app/apps/ws-backend
