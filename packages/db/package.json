@@ -11,7 +11,8 @@
   },
   "scripts": {
     "postinstall": "prisma generate --schema=./prisma/schema.prisma",
-    "build": "prisma generate --schema=./prisma/schema.prisma"
+    "build": "prisma generate --schema=./prisma/schema.prisma",
+    "generate": "prisma generate"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*"
