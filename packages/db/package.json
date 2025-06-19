@@ -3,26 +3,22 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "exports": {
-    "./client": "./src/index.ts"
-  },
-  "prisma": {
-    "schema": "./prisma/schema.prisma"
+  "exports" : {
+    "./client" : "./src/index.ts"
   },
   "scripts": {
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
-    "build": "prisma generate --schema=./prisma/schema.prisma",
-    "generate": "prisma generate"
+    "postinstall": "prisma generate",
+    "build": "prisma generate --schema=./prisma/schema.prisma"
   },
   "devDependencies": {
+    "@prisma/client": "6.10.1",
     "@repo/typescript-config": "workspace:*"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "6.5.0",
-    "prisma": "^6.5.0"
+    "prisma": "^6.10.1"
   }
 }
